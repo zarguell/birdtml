@@ -6,11 +6,7 @@ import { WebGPUBackend } from '@tensorflow/tfjs-backend-webgpu';
 let model: Awaited<ReturnType<typeof loadAndCompile>> | null = null;
 let labels: string[] = [];
 let device: GPUDevice | null = null;
-
-const BASE = import.meta.env.BASE_URL;
-const WASM_PATH = `${BASE}litert-wasm/`;
-const MODEL_URL = `${BASE}models/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite`;
-const LABELS_URL = `${BASE}labels_en.txt`;
+let baseUrl = '/birdtml/';
 
 async function initDevice() {
   const adapter = await navigator.gpu.requestAdapter();
@@ -20,7 +16,7 @@ async function initDevice() {
 }
 
 async function initModel() {
-  await loadLiteRt(WASM_PATH);
+  await loadLiteRt(`${baseUrl}litert-wasm/`);
 
   device = await initDevice();
   await tf.setBackend('webgpu');
@@ -28,9 +24,9 @@ async function initModel() {
   tf.registerBackend('webgpu', () => new WebGPUBackend(device!, device!.adapterInfo));
   await tf.setBackend('webgpu');
 
-  model = await loadAndCompile(MODEL_URL, { accelerator: 'webgpu' });
+  model = await loadAndCompile(`${baseUrl}models/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite`, { accelerator: 'webgpu' });
 
-  const labelRes = await fetch(LABELS_URL);
+  const labelRes = await fetch(`${baseUrl}labels_en.txt`);
   const labelText = await labelRes.text();
   labels = labelText.split('\n').filter((l) => l.trim().length > 0);
 
@@ -41,6 +37,7 @@ self.onmessage = async (e: MessageEvent) => {
   const { type, payload } = e.data;
 
   if (type === 'INIT') {
+    if (payload?.baseUrl) baseUrl = payload.baseUrl;
     await initModel();
     return;
   }

@@ -101,7 +101,7 @@ export default function App() {
         setModelLoading(false);
       };
 
-      worker.postMessage({ type: 'INIT' });
+      worker.postMessage({ type: 'INIT', payload: { baseUrl: BASE } });
 
       const ctx = new AudioContext({ sampleRate: 48000 });
       audioCtxRef.current = ctx;

@@ -7,9 +7,10 @@ let model: Awaited<ReturnType<typeof loadAndCompile>> | null = null;
 let labels: string[] = [];
 let device: GPUDevice | null = null;
 
-const WASM_PATH = '/litert-wasm/';
-const MODEL_URL = '/models/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite';
-const LABELS_URL = '/labels_en.txt';
+const BASE = import.meta.env.BASE_URL;
+const WASM_PATH = `${BASE}litert-wasm/`;
+const MODEL_URL = `${BASE}models/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite`;
+const LABELS_URL = `${BASE}labels_en.txt`;
 
 async function initDevice() {
   const adapter = await navigator.gpu.requestAdapter();

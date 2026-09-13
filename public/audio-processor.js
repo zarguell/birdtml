@@ -1,3 +1,5 @@
+export {};
+
 class BirdNetAudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super();

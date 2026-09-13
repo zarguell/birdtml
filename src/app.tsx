@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'preact/hooks';
 
+const BASE = import.meta.env.BASE_URL;
+
 interface Detection {
   species: string;
   score: number;
@@ -105,7 +107,7 @@ export default function App() {
       audioCtxRef.current = ctx;
       await ctx.resume();
 
-      await ctx.audioWorklet.addModule('/audio-processor.js');
+      await ctx.audioWorklet.addModule(`${BASE}audio-processor.js`);
 
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {

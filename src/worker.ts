@@ -24,11 +24,42 @@ async function initModel() {
   tf.registerBackend('webgpu', () => new WebGPUBackend(device!, device!.adapterInfo));
   await tf.setBackend('webgpu');
 
-  model = await loadAndCompile(`${baseUrl}models/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite`, { accelerator: 'webgpu' });
+  self.postMessage({ type: 'PROGRESS', payload: { stage: 'downloading', progress: 0 } });
+
+  const modelUrl = `${baseUrl}models/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite`;
+  const modelRes = await fetch(modelUrl);
+  if (!modelRes.ok) throw new Error(`Failed to fetch model: ${modelRes.statusText}`);
+
+  const contentLength = Number(modelRes.headers.get('content-length') ?? 0);
+  const reader = modelRes.body?.getReader();
+  if (!reader) throw new Error('Failed to read model stream');
+
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    if (contentLength) {
+      self.postMessage({ type: 'PROGRESS', payload: { stage: 'downloading', progress: received / contentLength } });
+    }
+  }
+
+  const modelData = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    modelData.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  self.postMessage({ type: 'PROGRESS', payload: { stage: 'compiling', progress: 0 } });
+
+  model = await loadAndCompile(modelData, { accelerator: 'webgpu' });
 
   const labelRes = await fetch(`${baseUrl}labels_en.txt`);
   const labelText = await labelRes.text();
-  labels = labelText.split('\n').filter((l) => l.trim().length > 0);
+  labels = labelRes.ok ? labelText.split('\n').filter((l) => l.trim().length > 0) : [];
 
   self.postMessage({ type: 'READY' });
 }

@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Safe area insets for notched devices */
+#app {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
 @theme {
   --color-amber-50: #fffbeb;
   --color-amber-100: #fef3c7;
@@ -68,3 +74,38 @@
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
+
+/* Accessibility — focus-visible */
+:focus-visible {
+  outline: 2px solid var(--color-amber-400);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+button:focus-visible {
+  outline-offset: 4px;
+}
+
+/* Accessibility — reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-ring,
+  .animate-wave,
+  .animate-fade-in-up,
+  .animate-spin,
+  .animate-pulse {
+    animation: none !important;
+  }
+}
+
+/* Mobile viewport height fix */
+.min-h-screen {
+  min-height: 100dvh;
+}
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fafaf9;
+    --text: #292524;
+    --text-secondary: #57534e;
+  }
+}
